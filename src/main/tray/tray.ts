@@ -24,12 +24,9 @@ export const createTray = () => {
   const image = nativeImage.createFromPath(getAssetPath('icon.png'));
   tray = new Tray(image.resize({ width: 16, height: 16 }));
 
-  const contextMenu = Menu.buildFromTemplate(Object.values(store.data));
+  let contextMenu = Menu.buildFromTemplate(Object.values(store.data));
   tray.setToolTip('This is my application.');
   tray.setContextMenu(contextMenu);
-
-  // Make a change to the context menu
-  //   contextMenu.items[1].checked = false;
 
   globalShortcut.register('CommandOrControl+C', () => {
     const text = clipboard.readText();
@@ -45,7 +42,7 @@ export const createTray = () => {
     };
     store.set(id, item);
 
-    const contextMenu = Menu.buildFromTemplate(Object.values(store.data));
+    contextMenu = Menu.buildFromTemplate(Object.values(store.data));
     tray?.setToolTip('This is my application.');
     tray?.setContextMenu(contextMenu);
   });

@@ -28,6 +28,9 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath, getAssetPath } from './util';
 import { createTray } from './tray/tray';
 
+// Enable live reload for all the files inside your project directory
+require('electron-reload')(__dirname);
+
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';

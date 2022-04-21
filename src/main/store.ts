@@ -1,25 +1,28 @@
 import path from 'path';
-import {
-  app,
-  BrowserWindow,
-  shell,
-  ipcMain,
-  Menu,
-  Tray,
-  clipboard,
-  nativeImage,
-  globalShortcut,
-  MenuItemConstructorOptions,
-} from 'electron';
+import { app, MenuItemConstructorOptions } from 'electron';
 import fs from 'fs';
 
 export type Options = {
   configName: string;
-  defaults: {};
+  defaults: Record<string, unknown>;
 };
+
+function parseDataFile(filePath: string, defaults = {}) {
+  // We'll try/catch it in case the file doesn't exist yet, which will be the case on the first application run.
+  // `fs.readFileSync` will return a JSON string which we then parse into a Javascript object
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return JSON.parse(fs.readFileSync(filePath));
+  } catch (error) {
+    // if there was some kind of error, return the passed in defaults instead.
+    return defaults;
+  }
+}
 
 export class Store {
   path: string = '';
+
   data: Record<string, MenuItemConstructorOptions> = {};
 
   constructor(opts: Options) {
@@ -27,7 +30,7 @@ export class Store {
     // app.getPath('userData') will return a string of the user's app data directory path.
     const userDataPath = app.getPath('userData');
     // We'll use the `configName` property to set the file name and path.join to bring it all together as a string
-    this.path = path.join(userDataPath, opts.configName + '.json');
+    this.path = path.join(userDataPath, `${opts.configName}.json`);
 
     this.data = parseDataFile(this.path, opts.defaults);
   }
@@ -45,17 +48,5 @@ export class Store {
     // Also if we used an async API and our app was quit before the asynchronous write had a chance to complete,
     // we might lose that data. Note that in a real app, we would try/catch this.
     fs.writeFileSync(this.path, JSON.stringify(this.data));
-  }
-}
-
-function parseDataFile(filePath: string, defaults = {}) {
-  // We'll try/catch it in case the file doesn't exist yet, which will be the case on the first application run.
-  // `fs.readFileSync` will return a JSON string which we then parse into a Javascript object
-  try {
-    // @ts-ignore
-    return JSON.parse(fs.readFileSync(filePath));
-  } catch (error) {
-    // if there was some kind of error, return the passed in defaults instead.
-    return defaults;
   }
 }
